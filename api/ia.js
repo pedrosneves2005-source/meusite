@@ -4,7 +4,7 @@
 // A busca pode levar até ~40s; aumenta o tempo máximo da função.
 export const config = { maxDuration: 60 };
 
-const MODELO = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const MODELO = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 const LIMITE_POR_IP = Number(process.env.LIMITE_POR_IP || 8); // consultas a cada 10 min
 const JANELA_MS = 10 * 60 * 1000;
 
@@ -72,7 +72,8 @@ async function chamarGemini(modo, texto, comBusca) {
       role: "user",
       parts: [{ text: modo === "checagem" ? `Conteúdo a checar:\n<<<\n${texto}\n>>>` : `Pergunta:\n<<<\n${texto}\n>>>` }]
     }],
-    generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
+    // Modelos novos "pensam" antes de responder e gastam parte desse limite; por isso ele é alto.
+    generationConfig: { temperature: 0.2, maxOutputTokens: 8192 }
   };
   if (comBusca) corpo.tools = [{ google_search: {} }];
 
@@ -132,7 +133,8 @@ export default async function handler(req, res) {
     }
 
     const candidato = r.dados.candidates?.[0];
-    const textoIA = (candidato?.content?.parts || []).map((p) => p.text || "").join("");
+    const textoIA = (candidato?.content?.parts || []).filter((p) => !p.thought).map((p) => p.text || "").join("");
+    if (!textoIA) console.error("Resposta vazia do Gemini:", candidato?.finishReason, JSON.stringify(r.dados).slice(0, 1500));
     const resultado = extrairJSON(textoIA);
     return res.status(200).json({
       modo,
