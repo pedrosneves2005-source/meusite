@@ -66,8 +66,15 @@ function coletarFontes(candidato) {
 }
 
 async function chamarGemini(modo, texto, comBusca) {
+  let instrucao = INSTRUCOES[modo]();
+  if (!comBusca) {
+    // Sem a ferramenta de busca, não pode mandar o modelo "usar a busca":
+    // ele tenta chamar uma ferramenta que não existe (erro MALFORMED_FUNCTION_CALL).
+    instrucao = instrucao.replace(/^Use a busca.*$/m,
+      "Você NÃO tem acesso à internet nesta resposta e não deve chamar nenhuma ferramenta. Responda com o que sabe e, para números recentes, diga o último período que você conhece e recomende conferir no IBGE ou no Banco Central.");
+  }
   const corpo = {
-    system_instruction: { parts: [{ text: INSTRUCOES[modo]() }] },
+    system_instruction: { parts: [{ text: instrucao }] },
     contents: [{
       role: "user",
       parts: [{ text: modo === "checagem" ? `Conteúdo a checar:\n<<<\n${texto}\n>>>` : `Pergunta:\n<<<\n${texto}\n>>>` }]
@@ -75,7 +82,11 @@ async function chamarGemini(modo, texto, comBusca) {
     // Modelos novos "pensam" antes de responder e gastam parte desse limite; por isso ele é alto.
     generationConfig: { temperature: 0.2, maxOutputTokens: 8192 }
   };
-  if (comBusca) corpo.tools = [{ google_search: {} }];
+  if (comBusca) {
+    corpo.tools = [{ google_search: {} }];
+  } else {
+    corpo.generationConfig.responseMimeType = "application/json";
+  }
 
   const resposta = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
