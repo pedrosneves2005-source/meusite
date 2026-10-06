@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>[Nome do site] · Economia e mercado</title>
+<meta name="description" content="Análises de mercado e checagem de notícias com fontes, por [Seu nome].">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+:root{
+  --papel:#EEF1F4; --grade:rgba(14,26,58,.07); --tinta:#0E1A3A; --tinta-2:#2A3556; --suave:#4A5470;
+  --laranja:#FF5A1F; --laranja-texto:#C2410C; --branco:#FFFFFF; --linha:#C9CFDC;
+  --ok:#1F7A4D; --erro:#B42318; --alerta:#B54708; --neutro:#4A5470;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:'Space Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--tinta); background-color:var(--papel);
+  background-image:linear-gradient(var(--grade) 1px,transparent 1px),linear-gradient(90deg,var(--grade) 1px,transparent 1px);
+  background-size:32px 32px; line-height:1.5;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.wrap{max-width:780px; margin:0 auto; padding:0 20px}
+header{padding:calc(48px + env(safe-area-inset-top,0px)) 0 24px}
+.marca{font-size:clamp(40px,9vw,72px); line-height:.95; font-weight:700; letter-spacing:-.03em; margin:0}
+.sub{font-size:19px; color:var(--tinta-2); margin:16px 0 0; max-width:56ch}
+.sub a{color:var(--tinta); font-weight:500}
+nav{display:grid; grid-template-columns:1fr 1fr; margin:32px 0 0; border:2px solid var(--tinta)}
+nav button{
+  font:inherit; font-size:18px; font-weight:700; padding:16px 12px; border:0; cursor:pointer;
+  background:transparent; color:var(--tinta);
+}
+nav button[aria-selected="true"]{background:var(--tinta); color:var(--branco)}
+nav button:focus-visible, button:focus-visible, textarea:focus-visible, a:focus-visible{outline:3px solid var(--laranja); outline-offset:2px}
+main{padding:32px 0 64px}
+section[hidden]{display:none}
+h2{font-size:28px; line-height:1.15; letter-spacing:-.02em; margin:0 0 8px}
+.intro{color:var(--tinta-2); margin:0 0 20px; max-width:60ch}
+.caixa{background:var(--branco); border:2px solid var(--tinta); padding:20px}
+textarea{
+  width:100%; min-height:120px; resize:vertical; font:inherit; font-size:17px; color:var(--tinta);
+  border:1px solid var(--linha); padding:12px; background:var(--branco);
+}
+.linha-acoes{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:12px}
+.botao{
+  font:inherit; font-size:17px; font-weight:700; background:var(--laranja); color:var(--tinta);
+  border:2px solid var(--tinta); padding:12px 20px; cursor:pointer;
+}
+.botao:disabled{opacity:.55; cursor:wait}
+.contador{font-size:14px; color:var(--suave)}
+.sugestoes{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0}
+.sugestoes button{
+  font:inherit; font-size:15px; background:var(--papel); color:var(--tinta); border:1px solid var(--linha);
+  padding:8px 12px; cursor:pointer; text-align:left;
+}
+.resultado{margin-top:24px}
+.resultado:empty{display:none}
+.selo{display:inline-block; font-weight:700; font-size:18px; color:var(--branco); padding:8px 14px; margin:0 0 12px}
+.resultado h3{font-size:20px; margin:20px 0 8px}
+.resultado p{margin:0 0 12px; max-width:65ch}
+.resultado ul{margin:0; padding-left:20px}
+.resultado li{margin:0 0 6px}
+.fontes a{color:var(--tinta); word-break:break-word}
+.aviso{font-size:14px; color:var(--suave); margin:16px 0 0}
+.erro-msg{color:var(--erro); font-weight:500}
+.carregando{color:var(--suave)}
+.checadores{margin:32px 0 0}
+.checadores ul{list-style:none; padding:0; margin:8px 0 0; display:flex; flex-wrap:wrap; gap:8px}
+.checadores a{display:inline-block; color:var(--tinta); border:1px solid var(--tinta); padding:6px 10px; text-decoration:none; background:var(--branco)}
+.posts{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; margin-top:12px}
+.post{background:var(--branco); border:2px solid var(--tinta); text-decoration:none; color:inherit; display:flex; flex-direction:column}
+.post .capa{aspect-ratio:4/5; background:var(--tinta); color:var(--branco); display:flex; align-items:flex-end; padding:16px; font-weight:700; font-size:22px; line-height:1.1; overflow:hidden}
+.post img{width:100%; aspect-ratio:4/5; object-fit:cover; display:block}
+.post .info{padding:12px 14px}
+.post .data{font-size:14px; color:var(--suave)}
+.bloco{margin-top:48px}
+footer{border-top:2px solid var(--tinta); padding:20px 0 40px; font-size:14px; color:var(--suave)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="marca" id="nome-site">[Nome do site]</h1>
+    <p class="sub">Economia e mercado explicados com dados, por <span id="nome-autora">[Seu nome]</span>, <span id="bio">[sua bio curta]</span>. Me acompanhe no <a id="link-insta" href="https://instagram.com/SEU_PERFIL" target="_blank" rel="noopener">Instagram</a>.</p>
+    <nav role="tablist" aria-label="Seções do site">
+      <button role="tab" id="tab-mercado" aria-controls="painel-mercado" aria-selected="true">Mercado</button>
+      <button role="tab" id="tab-checagem" aria-controls="painel-checagem" aria-selected="false" tabindex="-1">Checar notícia</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="painel-mercado" role="tabpanel" aria-labelledby="tab-mercado">
+      <h2>Pergunte sobre mercado</h2>
+      <p class="intro">Juros, inflação, setores, empresas. A IA busca dados atualizados e mostra de onde tirou cada informação.</p>
+      <div class="caixa">
+        <label for="pergunta-mercado" class="contador">Sua pergunta</label>
+        <textarea id="pergunta-mercado" maxlength="2000" placeholder="Ex.: O que a Selic alta faz com o crédito para as empresas?"></textarea>
+        <div class="linha-acoes">
+          <button class="botao" id="enviar-mercado">Perguntar</button>
+        </div>
+        <div class="sugestoes" aria-label="Perguntas sugeridas">
+          <button data-alvo="pergunta-mercado">Por que tem tanta farmácia no Brasil?</button>
+          <button data-alvo="pergunta-mercado">Como está a inflação este ano?</button>
+          <button data-alvo="pergunta-mercado">Por que os carros chineses estão crescendo no Brasil?</button>
+        </div>
+      </div>
+      <div class="resultado" id="resultado-mercado" aria-live="polite"></div>
+
+      <div class="bloco">
+        <h2>Últimos posts</h2>
+        <p class="intro">Os carrosséis completos estão no Instagram.</p>
+        <div class="posts" id="lista-posts"></div>
+      </div>
+    </section>
+
+    <section id="painel-checagem" role="tabpanel" aria-labelledby="tab-checagem" hidden>
+      <h2>Checar uma notícia</h2>
+      <p class="intro">Cole a notícia, o print transcrito ou a frase que está circulando. A IA procura em agências de checagem, veículos jornalísticos e fontes oficiais e mostra o que eles dizem.</p>
+      <div class="caixa">
+        <label for="texto-checagem" class="contador">Notícia ou afirmação</label>
+        <textarea id="texto-checagem" maxlength="2000" placeholder="Ex.: Candidato X disse que o desemprego caiu pela metade no último ano."></textarea>
+        <div class="linha-acoes">
+          <button class="botao" id="enviar-checagem">Checar com fontes</button>
+        </div>
+      </div>
+      <div class="resultado" id="resultado-checagem" aria-live="polite"></div>
+      <p class="aviso">Análise automática feita por inteligência artificial. Ela pode errar ou não encontrar a informação. Abra as fontes antes de compartilhar e, na dúvida, consulte os checadores abaixo. Este site não apoia nenhum candidato ou partido.</p>
+      <div class="checadores">
+        <h3 style="margin:0;font-size:18px">Checadores profissionais</h3>
+        <ul>
+          <li><a href="https://www.justicaeleitoral.jus.br/fato-ou-boato/" target="_blank" rel="noopener">Fato ou Boato (Justiça Eleitoral)</a></li>
+          <li><a href="https://www.aosfatos.org" target="_blank" rel="noopener">Aos Fatos</a></li>
+          <li><a href="https://g1.globo.com/fato-ou-fake/" target="_blank" rel="noopener">Fato ou Fake (g1)</a></li>
+          <li><a href="https://www.estadao.com.br/estadao-verifica/" target="_blank" rel="noopener">Estadão Verifica</a></li>
+          <li><a href="https://checamos.afp.com/" target="_blank" rel="noopener">AFP Checamos</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Conteúdo educativo. Não é recomendação de investimento. Respostas geradas por IA (Gemini, do Google) com busca na web. Não digite dados pessoais: o que você escreve aqui é enviado ao Google.</p>
+  </footer>
+</div>
+
+<script>
+// ====== PERSONALIZE AQUI ======
+const CONFIG = {
+  nomeSite: "[Nome do site]",
+  nomeAutora: "[Seu nome]",
+  bio: "estagiária de Inteligência de Mercado",
+  instagram: "https://instagram.com/SEU_PERFIL"
+};
+// Para adicionar um post: copie um bloco, troque os textos e coloque a capa na pasta /posts.
+const POSTS = [
+  { titulo: "Por que tem uma farmácia em cada esquina?", data: "Out/2026", imagem: "", link: "https://instagram.com/SEU_PERFIL" },
+  { titulo: "Saber só a teoria não te faz um economista 100%", data: "Out/2026", imagem: "", link: "https://instagram.com/SEU_PERFIL" },
+  { titulo: "O mercado automotivo da China", data: "2026", imagem: "", link: "https://instagram.com/SEU_PERFIL" }
+];
+// ==============================
+
+document.getElementById("nome-site").textContent = CONFIG.nomeSite;
+document.getElementById("nome-autora").textContent = CONFIG.nomeAutora;
+document.getElementById("bio").textContent = CONFIG.bio;
+document.getElementById("link-insta").href = CONFIG.instagram;
+document.title = CONFIG.nomeSite + " · Economia e mercado";
+
+// Abas
+const abas = [...document.querySelectorAll('[role="tab"]')];
+function abrirAba(aba) {
+  abas.forEach((a) => {
+    const ativa = a === aba;
+    a.setAttribute("aria-selected", ativa);
+    a.tabIndex = ativa ? 0 : -1;
+    document.getElementById(a.getAttribute("aria-controls")).hidden = !ativa;
+  });
+  history.replaceState(null, "", aba.id === "tab-checagem" ? "#checar" : "#mercado");
+}
+abas.forEach((a, i) => {
+  a.addEventListener("click", () => abrirAba(a));
+  a.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      const prox = abas[(i + (e.key === "ArrowRight" ? 1 : abas.length - 1)) % abas.length];
+      abrirAba(prox); prox.focus();
+    }
+  });
+});
+if (location.hash === "#checar") abrirAba(document.getElementById("tab-checagem"));
+
+// Posts
+const lista = document.getElementById("lista-posts");
+POSTS.forEach((p) => {
+  const a = document.createElement("a");
+  a.className = "post"; a.href = p.link; a.target = "_blank"; a.rel = "noopener";
+  if (p.imagem) {
+    const img = document.createElement("img"); img.src = p.imagem; img.alt = p.titulo; img.loading = "lazy";
+    a.appendChild(img);
+  } else {
+    const capa = document.createElement("div"); capa.className = "capa"; capa.textContent = p.titulo;
+    a.appendChild(capa);
+  }
+  const info = document.createElement("div"); info.className = "info";
+  const t = document.createElement("div"); t.textContent = p.titulo; t.style.fontWeight = "500";
+  const d = document.createElement("div"); d.className = "data"; d.textContent = p.data;
+  info.append(t, d); a.appendChild(info); lista.appendChild(a);
+});
+
+// Sugestões
+document.querySelectorAll(".sugestoes button").forEach((b) => {
+  b.addEventListener("click", () => {
+    const campo = document.getElementById(b.dataset.alvo);
+    campo.value = b.textContent; campo.focus();
+  });
+});
+
+// Helpers de renderização (sempre textContent, nunca HTML vindo da IA)
+function el(tag, texto, classe) {
+  const e = document.createElement(tag);
+  if (texto) e.textContent = texto;
+  if (classe) e.className = classe;
+  return e;
+}
+function lista_(itens) {
+  const ul = document.createElement("ul");
+  (itens || []).forEach((i) => ul.appendChild(el("li", String(i))));
+  return ul;
+}
+function blocoFontes(fontes) {
+  const div = el("div", "", "fontes");
+  if (!fontes || !fontes.length) return div;
+  div.appendChild(el("h3", "Fontes"));
+  const ul = document.createElement("ul");
+  fontes.forEach((f) => {
+    const li = document.createElement("li");
+    const a = el("a", f.titulo || f.url); a.href = f.url; a.target = "_blank"; a.rel = "noopener";
+    li.appendChild(a); ul.appendChild(li);
+  });
+  div.appendChild(ul);
+  return div;
+}
+const CORES = {
+  "Confirmado pelas fontes": "var(--ok)",
+  "Contestado pelas fontes": "var(--erro)",
+  "Impreciso ou fora de contexto": "var(--alerta)",
+  "Sem confirmação nas fontes consultadas": "var(--neutro)",
+  "Não é uma afirmação verificável": "var(--neutro)"
+};
+
+async function consultar(modo, texto, botao, saida, rotulo) {
+  if (texto.trim().length < 5) {
+    saida.replaceChildren(el("p", modo === "checagem" ? "Cole a notícia ou a frase que você quer checar." : "Escreva sua pergunta.", "erro-msg"));
+    return;
+  }
+  botao.disabled = true; botao.textContent = modo === "checagem" ? "Checando nas fontes..." : "Buscando dados...";
+  saida.replaceChildren(el("p", "Isso leva de 15 a 40 segundos, porque a IA está pesquisando.", "carregando"));
+  try {
+    const r = await fetch("/api/ia", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ modo, texto })
+    });
+    const dados = await r.json();
+    if (!r.ok) throw new Error(dados.erro || "Não foi possível responder agora.");
+    saida.replaceChildren();
+    if (dados.aviso) saida.append(el("p", dados.aviso, "aviso"));
+    const res = dados.resultado;
+    if (!res) {
+      saida.append(el("p", dados.bruto || "A IA não conseguiu montar a resposta. Tente reformular."), blocoFontes(dados.fontes));
+    } else if (modo === "checagem") {
+      const selo = el("div", res.classificacao || "Sem confirmação nas fontes consultadas", "selo");
+      selo.style.background = CORES[res.classificacao] || "var(--neutro)";
+      saida.append(selo);
+      if (res.afirmacao) saida.append(el("p", "Afirmação analisada: " + res.afirmacao));
+      if (res.resumo) saida.append(el("p", res.resumo));
+      if (res.o_que_as_fontes_dizem?.length) saida.append(el("h3", "O que as fontes dizem"), lista_(res.o_que_as_fontes_dizem));
+      if (res.cuidados?.length) saida.append(el("h3", "Pontos de atenção"), lista_(res.cuidados));
+      saida.append(blocoFontes(dados.fontes));
+    } else {
+      String(res.resposta || "").split(/\n\s*\n/).filter(Boolean).forEach((p) => saida.append(el("p", p)));
+      if (res.pontos?.length) saida.append(el("h3", "Em resumo"), lista_(res.pontos));
+      saida.append(blocoFontes(dados.fontes));
+    }
+  } catch (e) {
+    saida.replaceChildren(el("p", e.message || "Não foi possível responder agora. Tente de novo em instantes.", "erro-msg"));
+  } finally {
+    botao.disabled = false; botao.textContent = rotulo;
+  }
+}
+
+const bMercado = document.getElementById("enviar-mercado");
+bMercado.addEventListener("click", () =>
+  consultar("mercado", document.getElementById("pergunta-mercado").value, bMercado, document.getElementById("resultado-mercado"), "Perguntar"));
+const bChecar = document.getElementById("enviar-checagem");
+bChecar.addEventListener("click", () =>
+  consultar("checagem", document.getElementById("texto-checagem").value, bChecar, document.getElementById("resultado-checagem"), "Checar com fontes"));
+</script>
+</body>
+</html>

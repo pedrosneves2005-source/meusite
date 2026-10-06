@@ -1,0 +1,6 @@
+{
+  "name": "site-economia-mercado",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" }
+}
